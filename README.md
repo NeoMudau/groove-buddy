@@ -138,8 +138,3 @@ Groove Buddy connects **event creators**, **attendees**, and **platform administ
 ### Admin
 - `GET /api/admin/dashboard`
 - `GET /api/admin/events/{id}/analytics`
-
----
-
-## 📁 Project Structure
-
