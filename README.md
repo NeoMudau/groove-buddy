@@ -1,146 +1,105 @@
-# 🎧 Groove Buddy
+# Groove Buddy
 
-A role-based event discovery and management web application built with **Symfony 7**, **PHP 8.2**, and **PostgreSQL**.
+An event discovery platform for attendees and event organisers, built with **Symfony 7** and **PostgreSQL**.
 
-Groove Buddy connects **event creators**, **attendees**, and **platform administrators** in one ecosystem where users can create, discover, and engage with live events.
+> **Status: early stage.** The project foundation is in place (data model, database, admin tooling). Authentication and the event features are next. See the [Roadmap](#roadmap).
 
----
+## Screenshots
 
-## 🚀 Features
+<!-- HOW TO ADD: save each image in docs/screenshots/ with the file name shown, then delete the "Screenshot to add" line and remove the comment markers around the image line. -->
 
-### 👤 Authentication & Roles
-- Email and password authentication
-- Role-based access control:
-  - `ROLE_USER` → Event attendees
-  - `ROLE_ADMIN` → Event creators / organizers
-  - `ROLE_SUPER_ADMIN` → Platform management
+**Admin dashboard (EasyAdmin, `/admin`)**
 
----
+<!-- ![Admin dashboard](docs/screenshots/admin-dashboard.png) -->
+> 📸 Screenshot to add: `docs/screenshots/admin-dashboard.png`
 
-### 🎉 Event Management
-- Create, update, delete events (admins only)
-- Event details:
-  - Name
-  - Location
-  - Date & time
-  - Description
-  - Featured flag
-  - Video / YouTube links
-- Upload and manage event images
-- Attach artists to events
+**Database diagram (users and profiles)**
 
----
+<!-- ![Database diagram](docs/screenshots/database-diagram.png) -->
+> 📸 Screenshot to add: `docs/screenshots/database-diagram.png`
 
-### 👥 User Features
-- Browse events
-- View event details
-- Favorite events
-- Share events
-- Manage personal profile (individual or company)
+## What is built so far
 
----
+- Symfony 7.4 project on PHP 8.2+ with Doctrine ORM and a PostgreSQL 16 database running in Docker Compose (plus Mailpit for local email testing).
+- A user model with two profile types, linked with Doctrine one-to-one relationships:
 
-### 🎤 Artist System
-- Create and manage artists
-- Link artists to events
-- Add social media links for artists
+| Entity | Main fields |
+|---|---|
+| `User` | email, password, roles, verified, active, created and updated dates |
+| `AttendeeProfile` | first name, last name, date of birth, phone, profile image, bio |
+| `CreatorProfile` | individual or company, phone, address, profile image, bio, social media links, company name and registration number |
 
----
+- A first Doctrine migration that creates the `user`, `attendee_profile`, `creator_profile` and messenger tables.
+- EasyAdmin 5 installed, with the default dashboard at `/admin`. There are no management screens yet.
+- Front-end tooling installed: Twig, AssetMapper, Stimulus and Turbo.
 
-### ❤️ Engagement System
-- Favorite events
-- Track event views
-- Track shares
-- Event analytics per organizer
+## Roadmap
 
----
+Not built yet:
 
-### 📊 Admin Features
-- Admin dashboard
-- Event analytics (views, favorites, shares)
-- User management (super admin)
-- Role management
+- [ ] Registration, login and role-based access (attendee, organiser, admin)
+- [ ] Event entity with create, update and delete
+- [ ] Artists linked to events
+- [ ] Event images
+- [ ] Favourite events
+- [ ] Event views and shares, with analytics for organisers
+- [ ] Bootstrap-based user interface
+- [ ] Automated tests
 
----
+## Tech stack
 
-## 🧱 Tech Stack
+- PHP 8.2+, Symfony 7.4
+- Doctrine ORM and Doctrine Migrations
+- PostgreSQL 16 (Docker Compose)
+- EasyAdmin 5
+- Twig, AssetMapper, Stimulus, Turbo
+- Mailpit (local email testing)
+- PHPUnit (configured, no tests yet)
 
-### Backend
-- PHP 8.2
-- Symfony 7
-- Doctrine ORM
-- PostgreSQL
+## Run it locally
 
-### Frontend
-- Twig (server-side rendering)
-- Bootstrap 5
+**You need:** PHP 8.2+, Composer, Docker, and optionally the Symfony CLI.
 
-### Security
-- Symfony Security Bundle
-- Password hashing (Argon2 / bcrypt)
-- JWT authentication (optional)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/NeoMudau/groove-buddy.git
+   cd groove-buddy
+   ```
+2. Start the database:
+   ```bash
+   docker compose up -d
+   ```
+3. Install the dependencies:
+   ```bash
+   composer install
+   ```
+4. Point the app at PostgreSQL. The `.env` file still contains a MySQL placeholder, so create a `.env.local` file:
+   ```bash
+   # find the port Docker gave the database
+   docker compose port database 5432
+   ```
+   ```env
+   # .env.local  (replace PORT with the number from the command above)
+   DATABASE_URL="postgresql://app:%21ChangeMe%21@127.0.0.1:PORT/app?serverVersion=16&charset=utf8"
+   ```
+   These are the default development credentials from `compose.yaml`. Never use them in production.
+5. Create the tables:
+   ```bash
+   php bin/console doctrine:migrations:migrate
+   ```
+6. Start the app:
+   ```bash
+   symfony serve
+   # or: php -S localhost:8000 -t public
+   ```
+7. Open `http://localhost:8000/admin`.
 
-### Supporting Packages
-- Symfony Serializer
-- Symfony Validator
-- Doctrine Migrations
-- Symfony Mailer
-- Monolog
+> ⚠️ **Local use only.** There is no authentication yet, so the admin dashboard is open to anyone who can reach it.
 
----
+## Tests
 
-## 🗄️ Database Structure (Core Entities)
+PHPUnit is configured, but there are no tests yet. Adding them is on the roadmap.
 
-- User
-- Profile
-- Event
-- Artist
-- EventArtist (Many-to-Many)
-- EventImage
-- Favorite
-- EventAnalytics
-- SocialMedia
+## About this project
 
----
-
-## 🔐 Roles & Permissions
-
-| Role | Description |
-|------|-------------|
-| USER | Browse and engage with events |
-| ADMIN | Create and manage events |
-| SUPER_ADMIN | Full system control |
-
----
-
-## 📡 API Endpoints (Overview)
-
-### Authentication
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-
-### Events
-- `GET /api/events`
-- `GET /api/events/{id}`
-- `POST /api/events`
-- `PUT /api/events/{id}`
-- `DELETE /api/events/{id}`
-
-### Favorites
-- `POST /api/events/{id}/favorite`
-- `DELETE /api/events/{id}/favorite`
-- `GET /api/users/me/favorites`
-
-### Profiles
-- `POST /api/profile`
-- `GET /api/profile/{id}`
-
-### Admin
-- `GET /api/admin/dashboard`
-- `GET /api/admin/events/{id}/analytics`
-
-# ⚠️ Disclaimer
-
-This project was developed with the assistance of AI tools for **architecture design, documentation, and planning support**.  
-All implementation decisions, final structure, and development direction remain the responsibility of the developer.
-
+Parts of the planning and documentation were prepared with the help of AI tools. All implementation decisions, the final structure and the development direction remain my responsibility.
